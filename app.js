@@ -28,7 +28,9 @@ const DATA_PATH = path.join("data", "data.json"); // "./data/data.json"
 
 // Rutas
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index", {
+    namePage: "Inicio"
+  });
 });
 
 app.get("/category/:slug", async (req, res) => {
@@ -49,7 +51,9 @@ app.get("/category/:slug", async (req, res) => {
   );
 
   if (!categoryFind) {
-    return res.status(404).render("404");
+    return res.status(404).render("404", {
+      namePage: "Categoria no encontrada",
+    });
   }
 
   // Obtenemos todos los productos que tengan la categoria encontrada
@@ -64,9 +68,30 @@ app.get("/category/:slug", async (req, res) => {
   });
 });
 
-app.get("/product/:id", (req, res) => {
+app.get("/product/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log("ID del producto:", typeof id);
+
+   // Leer mi archivo data.json
+  const dataJson = await fs.readFile(DATA_PATH, "utf-8");
+
+  // Convertir el json a objeto
+  const data = JSON.parse(dataJson);
+
+  // Desestructuramos el data en products
+  const { products } = data;
+  // buscar el producto por id
+  const product = products.find((p) => p.id === Number(id));
+  //validamos que el producto exista
+  if (!product) {
+    return res.status(404).render("404", {
+      namePage: "Producto no encontrado",
+    });
+  }
+
   res.render("product", {
-    namePage: "Producto",
+    namePage: product.name,
+    product: product,
   });
 });
 
