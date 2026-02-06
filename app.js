@@ -70,7 +70,6 @@ app.get("/category/:slug", async (req, res) => {
 
 app.get("/product/:id", async (req, res) => {
   const { id } = req.params;
-  console.log("ID del producto:", typeof id);
 
    // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
