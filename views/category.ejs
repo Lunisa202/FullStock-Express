@@ -45,6 +45,13 @@
           Filtar Productos
         </button>
       </form>
+      <% if(products.length == 0) { %>
+        <div class="products__no-stock">
+          <h3 class="products__no-stock-title">No hay productos para esta categoría.</h3>
+          <p class="products__no-stock-description">Intenta cambiar de categoría o los filtros aplicados.</p>
+          <img src="/images/icons/no-stock.svg" alt="">
+        </div>
+      <% }else { %>
       <div class="products__grid">
         <% for (const product of products) { %>
         <a href="/product/<%= product.id %>" class="product-card">
@@ -61,12 +68,13 @@
               <p class="product-card__description">
                 <%= product.description %>
               </p>
-              <p class="product-card__price">S/ <%= product.price / 100 %></p>
+              <p class="product-card__price">S/ <%= (product.price / 100).toFixed(2) %></p>
             </div>
           </div>
         </a>
         <% } %>
       </div>
+      <% } %>
     </div>
   </div>
 </section>

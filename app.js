@@ -2,6 +2,7 @@ import express from "express";
 import expressLayouts from "express-ejs-layouts";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { parsePriceToCents, validationsPrices } from "./utils/utils.js";
 
 // Puerto de escucha de peticiones
 const PORT = 3000;
@@ -50,13 +51,17 @@ app.get("/", (req, res) => {
 
 app.get("/category/:slug", async (req, res) => {
   const { slug: categorySlug } = req.params;
-  const { minPrice: minPriceQuery, maxPrice: maxPriceQuery } = req.query;
+  const {
+    minPrice: minPriceQuery,
+    maxPrice: maxPriceQuery,
+    error: errorQuery,
+  } = req.query;
 
-  console.log({ minPriceQuery, maxPriceQuery });
+  const error = errorQuery === "true";
 
   // Validar los queries Strings
-  const minPrice = minPriceQuery ? Number(minPriceQuery) : -Infinity; // product.price > -Infinity
-  const maxPrice = maxPriceQuery ? Number(maxPriceQuery) : Infinity; // product.price < Infinity
+  const minPrice = parsePriceToCents(minPriceQuery) ? minPriceQuery : -Infinity; // product.price > -Infinity
+  const maxPrice = parsePriceToCents(maxPriceQuery) ? maxPriceQuery : Infinity; // product.price < Infinity
 
   // Leer mi archivo data.json
   const dataJson = await fs.readFile(DATA_PATH, "utf-8");
@@ -78,6 +83,16 @@ app.get("/category/:slug", async (req, res) => {
       title: "Página no encontrada",
       message: "Categoria no encontrada",
       path: "/",
+    });
+  }
+
+  const validations = validationsPrices(minPriceQuery, maxPriceQuery);
+  if (error && validations.title) {
+    return res.render("404", {
+      namePage: "Error categoría",
+      title: validations.title,
+      message: validations.message,
+      path: req.path,
     });
   }
 
